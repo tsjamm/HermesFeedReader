@@ -32,6 +32,7 @@ class FeedItemList extends Component {
     }
 
     getXMLReactTag(outerObj=null, property="", style={}, htmlStyle) {
+        console.log(outerObj)
         if(outerObj && outerObj[property] && outerObj[property].length > 0 ) {
             var valueWithAttrs = outerObj[property][0]["_"]
             if(valueWithAttrs) {
@@ -46,7 +47,7 @@ class FeedItemList extends Component {
                 if(attribs && attribs['type'] == 'html') {
                     return (
                         <HTMLView style={style}
-                            value={outerObj[property][0]["_"]}
+                            value={outerObj[property][0]["_"].replace(/\<img\s/g,'<image ')}
                             stylesheet={htmlStyle?htmlStyle:{}}
                         />
                     );
@@ -67,11 +68,7 @@ class FeedItemList extends Component {
                 )
             }
         }
-        return (
-            <Text style={style}>
-                Property Unavailable: {property}
-            </Text>
-        )
+        return false
     }
 
     getFeedEntries() {
@@ -86,10 +83,12 @@ class FeedItemList extends Component {
 
             if(outerObj && outerObj.entry) {
                 return outerObj.entry.map((innerObj, index) => {
+                    var content = this.getXMLReactTag(innerObj, "content");
+                    var summary = this.getXMLReactTag(innerObj, "summary")
                     return (
                         <View key={index} style={styles.summaryStyle}>
-                            {this.getXMLReactTag(innerObj, "title", styles.textStyle)}
-                            {this.getXMLReactTag(innerObj, "summary")}
+                            {this.getXMLReactTag(innerObj, "title")}
+                            {content?content:(summary?summary:"Content/Summary Not Available")}
                         </View>
                     )
                 });
