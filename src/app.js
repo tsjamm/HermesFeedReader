@@ -12,6 +12,8 @@ class App extends Component {
                     Feed
                 </Header>
                 <FeedItemList sourceURL={'https://stackoverflow.com/feeds/question/10943544'} />
+                {/*<FeedItemList sourceURL={'https://stackoverflow.com/feeds/question/10943544'} />*/}
+                {/*<FeedItemList sourceURL={'http://www1.cbn.com/app_feeds/rss/news/rss.php?section=world'} />*/}
             </View>
         )
     }

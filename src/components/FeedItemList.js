@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import { View, ScrollView, Text } from 'react-native';
 import axios from 'axios';
 import { parseString } from 'xml2js';
+import HTMLView from 'react-native-htmlview';
 
 class FeedItemList extends Component {
     state = { feedItem: {}, isLoading: true };
@@ -16,31 +17,70 @@ class FeedItemList extends Component {
             })
     }
 
-    getFeedTitle() {
-        if(this.state.feedItem && this.state.feedItem.feed && this.state.feedItem.feed.title && this.state.feedItem.feed.title.length > 0 ) {
-            return this.state.feedItem.feed.title[0]["_"];
+    getFieldValue(property="", style={}) {
+        if(this.state.feedItem) {
+            var outerObj = this.state.feedItem.feed || this.state.feedItem.channel || null;
+            return this.getXMLReactTag(outerObj, property, style);
         }
-        return "Title Unavailable";
     }
 
-    getFeedSubTitle() {
-        if(this.state.feedItem && this.state.feedItem.feed && this.state.feedItem.feed.subtitle && this.state.feedItem.feed.subtitle.length > 0 ) {
-            return this.state.feedItem.feed.subtitle[0]["_"];
+    getXMLReactTag(outerObj=null, property="", style={}, htmlStyle={}) {
+        if(outerObj && outerObj[property] && outerObj[property].length > 0 ) {
+            var valueWithAttrs = outerObj[property][0]["_"]
+            if(valueWithAttrs) {
+                var attribs = outerObj[property][0]['$'];
+                if(attribs && attribs['type'] == 'text') {
+                    return (
+                        <Text style={style}>
+                            {outerObj[property][0]["_"]}
+                        </Text>
+                    );
+                }
+                if(attribs && attribs['type'] == 'html') {
+                    return (
+                        <HTMLView style={style}
+                            value={outerObj[property][0]["_"]}
+                            stylesheet={htmlStyle}
+                        />
+                    );
+                }
+            } else {
+                <Text style={style}>
+                    {outerObj[property][0]}
+                </Text>
+            }
         }
-        return "Subtitle Unavailable";
+        return (
+            <Text style={style}>
+                Property Unavailable: {property}
+            </Text>
+        )
     }
 
     getFeedEntries() {
-        if(this.state.feedItem && this.state.feedItem.feed && this.state.feedItem.feed.entry) {
-            return this.state.feedItem.feed.entry.map((entryObj) => {
-                return (
-                    <View key={entryObj["id"][0]}>
-                        <Text>{entryObj["title"][0]["_"]}</Text>
-                        <Text>{entryObj["author"][0]["name"][0]}</Text>
-                        <Text>{entryObj["summary"][0]["_"]}</Text>
-                    </View>
-                )
-            });
+        if(this.state.feedItem) {
+            var outerObj = this.state.feedItem.feed || this.state.feedItem.channel || null;
+
+            if(outerObj.entry) {
+                return outerObj.entry.map((innerObj) => {
+                    return (
+                        <View key={innerObj["id"][0]} style={styles.summaryStyle}>
+                            {this.getXMLReactTag(innerObj, "title")}
+                            {this.getXMLReactTag(innerObj, "summary")}
+                        </View>
+                    )
+                });
+            }
+            if(outerObj.index) {
+                return outerObj.entry.map((innerObj) => {
+                    return (
+                        <View key={innerObj["id"][0]} style={styles.summaryStyle}>
+                            {this.getXMLReactTag(innerObj, "title")}
+                            {this.getXMLReactTag(innerObj, "description")}
+                        </View>
+                    )
+                });
+            }
         }
     }
 
@@ -57,12 +97,7 @@ class FeedItemList extends Component {
         return (
             <ScrollView>
                 <View>
-                    <Text style={styles.textStyle}>
-                        {this.getFeedTitle()}
-                    </Text>
-                    <Text>
-                        {this.getFeedSubTitle()}
-                    </Text>
+                    {this.getFieldValue("title", styles.titleStyle)}
                 </View>
                 {this.getFeedEntries()}
             </ScrollView>
@@ -85,7 +120,20 @@ const styles = {
     },
     textStyle: {
         fontSize: 20
-    }
+    },
+    summaryStyle: {
+        margin:10,
+        padding:10,
+        borderWidth: 1,
+        borderColor: '#d6d7da',
+        borderRadius: 4
+    },
+    titleStyle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        margin:10,
+        justifyContent: 'center'
+    },
 }
 
 export { FeedItemList };
