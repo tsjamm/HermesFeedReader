@@ -19,12 +19,19 @@ class FeedItemList extends Component {
 
     getFieldValue(property="", style={}) {
         if(this.state.feedItem) {
-            var outerObj = this.state.feedItem.feed || this.state.feedItem.channel || null;
+
+            var outerObj = null;
+            if(this.state.feedItem.feed) {
+                outerObj = this.state.feedItem.feed
+            }
+            if(this.state.feedItem.rss && this.state.feedItem.rss.channel && this.state.feedItem.rss.channel.length > 0) {
+                outerObj = this.state.feedItem.rss.channel[0];
+            }
             return this.getXMLReactTag(outerObj, property, style);
         }
     }
 
-    getXMLReactTag(outerObj=null, property="", style={}, htmlStyle={}) {
+    getXMLReactTag(outerObj=null, property="", style={}, htmlStyle) {
         if(outerObj && outerObj[property] && outerObj[property].length > 0 ) {
             var valueWithAttrs = outerObj[property][0]["_"]
             if(valueWithAttrs) {
@@ -40,14 +47,24 @@ class FeedItemList extends Component {
                     return (
                         <HTMLView style={style}
                             value={outerObj[property][0]["_"]}
-                            stylesheet={htmlStyle}
+                            stylesheet={htmlStyle?htmlStyle:{}}
                         />
                     );
                 }
             } else {
-                <Text style={style}>
-                    {outerObj[property][0]}
-                </Text>
+                if(htmlStyle) {
+                    return (
+                        <HTMLView style={style}
+                            value={outerObj[property][0].replace(/\<img\s/g,'<image ')}
+                            stylesheet={htmlStyle}
+                        />
+                    );
+                }
+                return (
+                    <Text style={style}>
+                        {outerObj[property][0]}
+                    </Text>
+                )
             }
         }
         return (
@@ -59,24 +76,30 @@ class FeedItemList extends Component {
 
     getFeedEntries() {
         if(this.state.feedItem) {
-            var outerObj = this.state.feedItem.feed || this.state.feedItem.channel || null;
+            var outerObj = null;
+            if(this.state.feedItem.feed) {
+                outerObj = this.state.feedItem.feed
+            }
+            if(this.state.feedItem.rss && this.state.feedItem.rss.channel && this.state.feedItem.rss.channel.length > 0) {
+                outerObj = this.state.feedItem.rss.channel[0];
+            }
 
-            if(outerObj.entry) {
-                return outerObj.entry.map((innerObj) => {
+            if(outerObj && outerObj.entry) {
+                return outerObj.entry.map((innerObj, index) => {
                     return (
-                        <View key={innerObj["id"][0]} style={styles.summaryStyle}>
-                            {this.getXMLReactTag(innerObj, "title")}
+                        <View key={index} style={styles.summaryStyle}>
+                            {this.getXMLReactTag(innerObj, "title", styles.textStyle)}
                             {this.getXMLReactTag(innerObj, "summary")}
                         </View>
                     )
                 });
             }
-            if(outerObj.index) {
-                return outerObj.entry.map((innerObj) => {
+            if(outerObj && outerObj.item) {
+                return outerObj.item.map((innerObj, index) => {
                     return (
-                        <View key={innerObj["id"][0]} style={styles.summaryStyle}>
-                            {this.getXMLReactTag(innerObj, "title")}
-                            {this.getXMLReactTag(innerObj, "description")}
+                        <View key={index} style={styles.summaryStyle}>
+                            {this.getXMLReactTag(innerObj, "title", styles.textStyle)}
+                            {this.getXMLReactTag(innerObj, "description", {}, {})}
                         </View>
                     )
                 });
@@ -94,6 +117,7 @@ class FeedItemList extends Component {
                 </View>
             );
         }
+        console.log(this.state.feedItem);
         return (
             <ScrollView>
                 <View>
