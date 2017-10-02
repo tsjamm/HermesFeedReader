@@ -1,0 +1,10 @@
+[
+    {"id": 0,
+    "title": "Google News: NodeJS",
+    "url": "https://news.google.com/news/feeds?pz=1&cf=all&ned=us&hl=en&q=nodejs&output=rss"
+    },
+    {"id": 1,
+    "title": "StackOverflow Sample Question",
+    "url": "https://stackoverflow.com/feeds/question/10943544"
+    }
+]

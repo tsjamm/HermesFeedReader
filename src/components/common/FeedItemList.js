@@ -32,7 +32,6 @@ class FeedItemList extends Component {
     }
 
     getXMLReactTag(outerObj=null, property="", style={}, htmlStyle) {
-        console.log(outerObj)
         if(outerObj && outerObj[property] && outerObj[property].length > 0 ) {
             var valueWithAttrs = outerObj[property][0]["_"]
             if(valueWithAttrs) {
@@ -109,7 +108,7 @@ class FeedItemList extends Component {
     render() {
         if(this.state.isLoading) {
             return (
-                <View style={styles.viewStyle}>
+                <View style={styles.loadingViewStyle}>
                     <Text style={styles.textStyle}>
                         Loading...
                     </Text>
@@ -129,7 +128,7 @@ class FeedItemList extends Component {
 }
 
 const styles = {
-    viewStyle: {
+    loadingViewStyle: {
         backgroundColor: '#FFFFFF',
         justifyContent: 'center',
         alignItems: 'center',

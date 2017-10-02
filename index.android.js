@@ -1,4 +1,4 @@
 import { AppRegistry } from 'react-native';
-import App from './src/app';
+import AppProvider from './src/AppProvider';
 
-AppRegistry.registerComponent('HermesFeedReader', () => App);
+AppRegistry.registerComponent('HermesFeedReader', () => AppProvider);
