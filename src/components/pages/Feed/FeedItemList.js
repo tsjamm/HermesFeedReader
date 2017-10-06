@@ -1,20 +1,31 @@
 
 import React, { Component } from 'react';
-import { View, ScrollView, Text } from 'react-native';
+import { View, ScrollView, Text, ListView } from 'react-native';
 import axios from 'axios';
 import { parseString } from 'xml2js';
 import HTMLView from 'react-native-htmlview';
 
 class FeedItemList extends Component {
-    state = { feedItem: {}, isLoading: true };
+    state = { feedItem: {}, isLoading: true, dataSource: []};
 
     componentWillMount() {
+
         axios.get(this.props.sourceURL)
             .then(response => {
                 parseString(response.data, (err, result) => {
-                    this.setState({ feedItem: result, isLoading: false });
+                    this.setFeedListDataSource(result);
                 });
             })
+    }
+
+    componentWillUpdate(nextProps, nextState) {
+        if (this.state.dataSource != nextState.dataSource) {
+            const ds = new ListView.DataSource({
+                rowHasChanged: (r1, r2) => r1 !== r2
+            });
+
+            this.dataSource = ds.cloneWithRows(nextState.dataSource);
+        }
     }
 
     getFieldValue(property="", style={}) {
@@ -70,39 +81,47 @@ class FeedItemList extends Component {
         return false
     }
 
-    getFeedEntries() {
-        if(this.state.feedItem) {
+    setFeedListDataSource(xml2jsonResult) {
+        var newDataSource = {}
+        if(xml2jsonResult) {
             var outerObj = null;
-            if(this.state.feedItem.feed) {
-                outerObj = this.state.feedItem.feed
+            if(xml2jsonResult.feed) {
+                outerObj = xml2jsonResult.feed
             }
-            if(this.state.feedItem.rss && this.state.feedItem.rss.channel && this.state.feedItem.rss.channel.length > 0) {
-                outerObj = this.state.feedItem.rss.channel[0];
+            if(xml2jsonResult.rss && xml2jsonResult.rss.channel && xml2jsonResult.rss.channel.length > 0) {
+                outerObj = xml2jsonResult.rss.channel[0];
             }
 
             if(outerObj && outerObj.entry) {
-                return outerObj.entry.map((innerObj, index) => {
-                    var content = this.getXMLReactTag(innerObj, "content");
-                    var summary = this.getXMLReactTag(innerObj, "summary")
-                    return (
-                        <View key={index} style={styles.summaryStyle}>
-                            {this.getXMLReactTag(innerObj, "title")}
-                            {content?content:(summary?summary:"Content/Summary Not Available")}
-                        </View>
-                    )
-                });
+                newDataSource = outerObj.entry;
+                //this.setState({ dataSource: outerObj.entry, feedItem: result, isLoading: false  });
+                //this.dataSource = ds.cloneWithRows(outerObj.entry);
             }
             if(outerObj && outerObj.item) {
-                return outerObj.item.map((innerObj, index) => {
-                    return (
-                        <View key={index} style={styles.summaryStyle}>
-                            {this.getXMLReactTag(innerObj, "title", styles.textStyle)}
-                            {this.getXMLReactTag(innerObj, "description", {}, {})}
-                        </View>
-                    )
-                });
+                newDataSource = outerObj.item;
+                //this.setState({ dataSource: outerObj.item, feedItem: result, isLoading: false  });
+                //this.dataSource = ds.cloneWithRows(outerObj.item);
             }
         }
+        
+        this.setState({ 
+            feedItem: xml2jsonResult, 
+            isLoading: false,
+            dataSource: newDataSource
+        });
+    }
+
+    renderRow(source) {
+        var title = this.getXMLReactTag(source, "title", styles.textStyle)
+        var content = this.getXMLReactTag(source, "content");
+        var summary = this.getXMLReactTag(source, "summary");
+        var description = this.getXMLReactTag(source, "description", {}, {})
+        return (
+            <View style={styles.summaryStyle}>
+                {title}
+                {content?content:(summary?summary:(description?description:"Content/Summary/Description Not Available"))}
+            </View>
+        )
     }
 
     render() {
@@ -115,13 +134,15 @@ class FeedItemList extends Component {
                 </View>
             );
         }
-        console.log(this.state.feedItem);
         return (
             <ScrollView>
                 <View>
                     {this.getFieldValue("title", styles.titleStyle)}
                 </View>
-                {this.getFeedEntries()}
+                <ListView
+                    dataSource={this.dataSource}
+                    renderRow={this.renderRow.bind(this)}
+                />
             </ScrollView>
         );
     }
@@ -158,4 +179,4 @@ const styles = {
     },
 }
 
-export { FeedItemList };
+export default FeedItemList;
