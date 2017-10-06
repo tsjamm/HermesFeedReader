@@ -1,16 +1,8 @@
 
 import React, { Component } from 'react';
 import { ListView, View, Text, TouchableOpacity } from 'react-native';
-import { connect } from 'react-redux';
-import * as actions from '../../actions';
 
-const mapStateToProps = (state, ownProps) => {
-    return {
-        sources: state.sources
-    }
-}
-
-class FeedSourceList extends Component {
+class SourceItemList extends Component {
 
     componentWillMount() {
         const ds = new ListView.DataSource({
@@ -23,7 +15,7 @@ class FeedSourceList extends Component {
     renderRow(source) {
         return (
             <TouchableOpacity 
-                onPress={() => this.props.selectSource(source)} 
+                onPress={() => this.props.selectSource(source)}
             >
                 <View style={styles.summaryStyle} >
                     <Text style={styles.textStyle}>
@@ -63,4 +55,4 @@ const styles = {
     },
 }
 
-export default connect(mapStateToProps, actions)(FeedSourceList);
+export default SourceItemList;
