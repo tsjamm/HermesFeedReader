@@ -1,8 +1,9 @@
 
 import React, { Component } from 'react';
 import { View } from 'react-native';
+import { Container, Header, Content, Title, Body, Left, Right, Button, Icon, Text } from 'native-base';
 
-import { Header } from '../../common';
+// import { Header } from '../../common';
 import SourceItemList from  './SourceItemList';
 
 class Sources extends Component {
@@ -10,19 +11,23 @@ class Sources extends Component {
     render() {
         const { sources, selectSource} = this.props;
         return (
-            <View style={styles.containerViewStyle} >
+            <Container>
                 <Header>
-                    Sources
+                    <Left>
+                        <Button transparent>
+                            <Icon name='menu' />
+                        </Button>
+                    </Left>
+                    <Body>
+                        <Title>Sources</Title>
+                    </Body>
+                    <Right />
                 </Header>
-                <SourceItemList sources={sources} selectSource={selectSource.bind(this)} />
-            </View>
+                <Content>
+                    <SourceItemList sources={sources} selectSource={selectSource.bind(this)} />
+                </Content>
+            </Container>
         )
-    }
-}
-
-const styles = {
-    containerViewStyle: {
-
     }
 }
 
