@@ -9,12 +9,12 @@ import SourceItemList from  './SourceItemList';
 class Sources extends Component {
 
     render() {
-        const { sources, selectSource} = this.props;
+        const { sources, selectSource } = this.props;
         return (
             <Container>
                 <Header>
                     <Left>
-                        <Button transparent>
+                        <Button transparent onPress={this.props.toggleMenu.bind(this)}>
                             <Icon name='menu' />
                         </Button>
                     </Left>

@@ -5,25 +5,14 @@ import { connect } from 'react-redux';
 
 import * as actions from '../actions';
 
-import SourcesContainer from '../components/pages/Sources';
-import FeedContainer from '../components/pages/Feed';
+import { BaseContainer } from '../components/pages';
 
 class App extends Component {
-
-    renderPage() {
-        var { selectedSource } = this.props;
-        if(selectedSource) {
-            return (
-                <FeedContainer />
-            )
-        }
-        return <SourcesContainer />
-    }
 
     render() {
         return (
             <View style={styles.mainViewStyle}>
-                {this.renderPage()}
+                <BaseContainer />
             </View>
         )
     }
